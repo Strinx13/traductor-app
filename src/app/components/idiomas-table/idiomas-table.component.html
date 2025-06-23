@@ -1,0 +1,60 @@
+<div class="bg-white rounded-lg shadow p-6">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-lg font-bold">Idiomas</h2>
+    <button class="rounded" (click)="agregarIdioma()">
+      <i class="fi fi-br-plus"></i>
+    </button>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-sm text-left border border-gray-200 rounded">
+      <thead class="bg-gray-200">
+        <tr>
+          <th class="px-3 py-2">ID</th>
+          <th class="px-3 py-2">Nombre</th>
+          <th class="px-3 py-2">Código ISO</th>
+          <th class="px-3 py-2">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let idioma of idiomas" class="bg-white border-b">
+          <td class="px-3 py-2">{{ idioma.id_idioma }}</td>
+          <td class="px-3 py-2">{{ idioma.nombre_idioma }}</td>
+          <td class="px-3 py-2">{{ idioma.codigo_iso }}</td>
+          <td class="px-3 py-2 flex gap-2">
+            <button class="bg-yellow-200 hover:bg-yellow-300 text-gray-900 px-2 py-1 rounded text-xs font-semibold" (click)="editarIdioma(idioma)">
+              <i class="fi fi-br-edit"></i>
+            </button>
+            <button class="bg-red-200 hover:bg-red-300 text-gray-900 px-2 py-1 rounded text-xs font-semibold" (click)="eliminarIdioma(idioma)">
+              <i class="fi fi-sr-trash"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal para agregar/editar idioma -->
+<div *ngIf="idiomaSeleccionado" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+  <div class="bg-white p-6 rounded-lg w-96">
+    <h3 class="text-lg font-bold mb-4">{{ modoEdicion ? 'Editar' : 'Agregar' }} Idioma</h3>
+    <form (ngSubmit)="guardarIdioma(idiomaSeleccionado)">
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700">Nombre</label>
+        <input type="text" [(ngModel)]="idiomaSeleccionado.nombre_idioma" name="nombre_idioma" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700">Código ISO</label>
+        <input type="text" [(ngModel)]="idiomaSeleccionado.codigo_iso" name="codigo_iso" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+      </div>
+      <div class="flex justify-end gap-2">
+        <button type="button" (click)="idiomaSeleccionado = null" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
+          Cancelar
+        </button>
+        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">
+          Guardar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

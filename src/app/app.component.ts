@@ -1,12 +1,22 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { SidebarComponent } from './components/sidebar.component';
+import { ModulosTableComponent } from './components/modulos-table/modulos-table.component';
+import { EtiquetasTableComponent } from './components/etiquetas-table/etiquetas-table.component';
+import { IdiomasTableComponent } from './components/idiomas-table/idiomas-table.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [CommonModule, SidebarComponent, ModulosTableComponent, EtiquetasTableComponent, IdiomasTableComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'traductor-app';
+  tablaSeleccionada = 'modulos';
+
+  cambiarTabla(tabla: string) {
+    console.log('Cambiando a tabla:', tabla);
+    this.tablaSeleccionada = tabla;
+  }
 }
