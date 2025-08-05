@@ -1,0 +1,44 @@
+<div class="bg-white rounded-lg shadow p-6">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-lg font-bold">Idiomas</h2>
+    <button class="rounded" (click)="agregarIdioma()">
+      <i class="fi fi-br-plus"></i>
+    </button>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-sm text-left border border-gray-200 rounded">
+      <thead class="bg-gray-200">
+        <tr>
+          <th class="px-3 py-2">ID</th>
+          <th class="px-3 py-2">Nombre</th>
+          <th class="px-3 py-2">Código ISO</th>
+          <th class="px-3 py-2">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let idioma of idiomas" class="bg-white border-b">
+          <td class="px-3 py-2">{{ idioma.id_idioma }}</td>
+          <td class="px-3 py-2">{{ idioma.nombre_idioma }}</td>
+          <td class="px-3 py-2">{{ idioma.codigo_iso }}</td>
+          <td class="px-3 py-2 flex gap-2">
+            <button class="bg-yellow-200 hover:bg-yellow-300 text-gray-900 px-2 py-1 rounded text-xs font-semibold" (click)="editarIdioma(idioma)">
+              <i class="fi fi-br-edit"></i>
+            </button>
+            <button class="bg-red-200 hover:bg-red-300 text-gray-900 px-2 py-1 rounded text-xs font-semibold" (click)="eliminarIdioma(idioma)">
+              <i class="fi fi-sr-trash"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Componente de formulario separado -->
+<app-idioma-form 
+  *ngIf="idiomaSeleccionado"
+  [idioma]="idiomaSeleccionado"
+  [modoEdicion]="modoEdicion"
+  (guardar)="guardarIdioma($event)"
+  (cancelar)="cerrarFormulario()">
+</app-idioma-form>

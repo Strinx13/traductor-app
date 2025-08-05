@@ -1,0 +1,66 @@
+<div class="bg-white rounded-lg shadow p-6">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-lg font-bold">Etiquetas</h2>
+    <button class="rounded" (click)="agregarEtiqueta()" [disabled]="!moduloSeleccionado">
+      <i class="fi fi-br-plus"></i>
+    </button>
+  </div>
+  <div class="mb-4">
+    <label class="block text-sm font-medium text-gray-700 mb-1">Selecciona un módulo:</label>
+    <select [(ngModel)]="moduloSeleccionado" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+      <option [ngValue]="null">-- Selecciona un módulo --</option>
+      <option *ngFor="let modulo of modulos" [ngValue]="modulo.id_modulo">{{ modulo.nombre_modulo }}</option>
+    </select>
+  </div>
+  <div class="overflow-x-auto" *ngIf="moduloSeleccionado">
+    <table class="min-w-full text-sm text-left border border-gray-200 rounded">
+      <thead class="bg-gray-200">
+        <tr>
+          <th class="px-3 py-2">ID</th>
+          <th class="px-3 py-2">Descripción</th>
+          <th class="px-3 py-2">Módulo</th>
+          <th class="px-3 py-2">Porcentaje de Traducción</th>
+          <th class="px-3 py-2">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let etiqueta of etiquetasFiltradas" class="bg-white border-b">
+          <td class="px-3 py-2">{{ etiqueta.id_etiqueta }}</td>
+          <td class="px-3 py-2">{{ etiqueta.descripcion_etiqueta }}</td>
+          <td class="px-3 py-2">{{ getNombreModulo(etiqueta.id_modulo) }}</td>
+          <td class="px-3 py-2">{{ etiqueta.porcentaje_traduccion }}%</td>
+          <td class="px-3 py-2 flex gap-2">
+            <button class="bg-blue-200 hover:bg-blue-300 text-gray-900 px-2 py-1 rounded text-xs font-semibold" (click)="abrirTraducciones(etiqueta)" title="Gestionar Traducciones">
+              <i class="fi fi-br-globe"></i>
+            </button>
+            <button class="bg-yellow-200 hover:bg-yellow-300 text-gray-900 px-2 py-1 rounded text-xs font-semibold" (click)="editarEtiqueta(etiqueta)">
+              <i class="fi fi-br-edit"></i>
+            </button>
+            <button class="bg-red-200 hover:bg-red-300 text-gray-900 px-2 py-1 rounded text-xs font-semibold" (click)="eliminarEtiqueta(etiqueta)">
+              <i class="fi fi-sr-trash"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Componente de formulario separado -->
+<app-etiqueta-form 
+  *ngIf="etiquetaSeleccionada"
+  [etiqueta]="etiquetaSeleccionada"
+  [modulos]="modulos"
+  [modoEdicion]="modoEdicion"
+  [moduloSeleccionado]="moduloSeleccionado"
+  (guardar)="guardarEtiqueta($event)"
+  (cancelar)="cerrarFormulario()">
+</app-etiqueta-form>
+
+<!-- Componente de traducciones -->
+<app-traducciones 
+  *ngIf="etiquetaTraducciones"
+  [etiqueta]="etiquetaTraducciones"
+  [idiomas]="idiomas"
+  (cerrar)="cerrarTraducciones()">
+</app-traducciones>

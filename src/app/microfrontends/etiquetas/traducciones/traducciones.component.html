@@ -1,0 +1,121 @@
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 modal-overlay">
+  <div class="bg-white p-6 rounded-lg w-[800px] max-h-[90vh] overflow-y-auto form-container">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-bold">Traducciones - {{ etiqueta?.descripcion_etiqueta }}</h3>
+      <button 
+        (click)="onCerrar()" 
+        class="text-gray-500 hover:text-gray-700">
+        <i class="fi fi-br-cross"></i>
+      </button>
+    </div>
+
+    <!-- Formulario para agregar nueva traducción -->
+    <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+      <h4 class="font-semibold mb-3">Agregar Nueva Traducción</h4>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Idioma</label>
+          <select 
+            [(ngModel)]="nuevaTraduccion.id_idioma" 
+            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            <option [ngValue]="0">Seleccione un idioma</option>
+            <option *ngFor="let idioma of getIdiomasDisponibles()" [ngValue]="idioma.id_idioma">
+              {{ idioma.nombre_idioma }} ({{ idioma.codigo_iso }})
+            </option>
+          </select>
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Traducción</label>
+          <input 
+            type="text" 
+            [(ngModel)]="nuevaTraduccion.texto_traduccion" 
+            placeholder="Escriba la traducción..."
+            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </div>
+      </div>
+      <button 
+        (click)="agregarTraduccion()" 
+        [disabled]="!nuevaTraduccion.id_idioma || !nuevaTraduccion.texto_traduccion"
+        class="mt-3 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:bg-gray-300 disabled:cursor-not-allowed">
+        Agregar Traducción
+      </button>
+    </div>
+
+    <!-- Lista de traducciones existentes -->
+    <div class="mb-4">
+      <h4 class="font-semibold mb-3">Traducciones Existentes</h4>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm text-left border border-gray-200 rounded">
+          <thead class="bg-gray-200">
+            <tr>
+              <th class="px-3 py-2">Idioma</th>
+              <th class="px-3 py-2">Código ISO</th>
+              <th class="px-3 py-2">Traducción</th>
+              <th class="px-3 py-2">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let traduccion of traducciones" class="bg-white border-b">
+              <td class="px-3 py-2">{{ getNombreIdioma(traduccion.id_idioma) }}</td>
+              <td class="px-3 py-2">{{ traduccion.codigo_iso }}</td>
+              <td class="px-3 py-2">
+                <div *ngIf="!modoEdicion || traduccionEditando?.id_traduccion !== traduccion.id_traduccion">
+                  {{ traduccion.texto_traduccion }}
+                </div>
+                <div *ngIf="modoEdicion && traduccionEditando?.id_traduccion === traduccion.id_traduccion">
+                  <input 
+                    type="text" 
+                    [(ngModel)]="traduccionEditando.texto_traduccion" 
+                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+              </td>
+              <td class="px-3 py-2 flex gap-2">
+                <button 
+                  *ngIf="!modoEdicion || traduccionEditando?.id_traduccion !== traduccion.id_traduccion"
+                  (click)="editarTraduccion(traduccion)" 
+                  class="bg-yellow-200 hover:bg-yellow-300 text-gray-900 px-2 py-1 rounded text-xs font-semibold">
+                  <i class="fi fi-br-edit"></i>
+                </button>
+                <button 
+                  *ngIf="modoEdicion && traduccionEditando?.id_traduccion === traduccion.id_traduccion"
+                  (click)="guardarTraduccion()" 
+                  class="bg-green-200 hover:bg-green-300 text-gray-900 px-2 py-1 rounded text-xs font-semibold">
+                  <i class="fi fi-br-check"></i>
+                </button>
+                <button 
+                  *ngIf="modoEdicion && traduccionEditando?.id_traduccion === traduccion.id_traduccion"
+                  (click)="cancelarEdicion()" 
+                  class="bg-gray-200 hover:bg-gray-300 text-gray-900 px-2 py-1 rounded text-xs font-semibold">
+                  <i class="fi fi-br-cross"></i>
+                </button>
+                <button 
+                  (click)="eliminarTraduccion(traduccion)" 
+                  class="bg-red-200 hover:bg-red-300 text-gray-900 px-2 py-1 rounded text-xs font-semibold">
+                  <i class="fi fi-sr-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Información del progreso -->
+    <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+      <div class="flex justify-between items-center">
+        <span class="text-sm font-medium text-blue-800">
+          Progreso de Traducción: {{ traducciones.length }} de {{ idiomas.length }} idiomas
+        </span>
+        <span class="text-sm font-bold text-blue-800">
+          {{ getPorcentajeTraduccion() }}%
+        </span>
+      </div>
+      <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+        <div 
+          class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+          [style.width.%]="getPorcentajeTraduccion()">
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

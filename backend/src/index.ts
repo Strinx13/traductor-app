@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { modulosRouter } from './routes/modulos.routes';
 import { etiquetasRouter } from './routes/etiquetas.routes';
 import { idiomasRouter } from './routes/idiomas.routes';
+import { traduccionesRouter } from './routes/traducciones.routes';
 import { pool } from './config/database';
 
 dotenv.config();
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use('/api/modulos', modulosRouter);
 app.use('/api/etiquetas', etiquetasRouter);
 app.use('/api/idiomas', idiomasRouter);
+app.use('/api/traducciones', traduccionesRouter);
 
 app.listen(port, async () => {
   try {

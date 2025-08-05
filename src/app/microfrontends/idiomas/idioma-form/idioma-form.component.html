@@ -1,0 +1,42 @@
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 modal-overlay">
+  <div class="bg-white p-6 rounded-lg w-96 max-h-[90vh] overflow-y-auto form-container">
+    <h3 class="text-lg font-bold mb-4">{{ modoEdicion ? 'Editar' : 'Agregar' }} Idioma</h3>
+    <form (ngSubmit)="onGuardar()">
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700">Nombre</label>
+        <input 
+          type="text" 
+          [(ngModel)]="idioma.nombre_idioma" 
+          name="nombre_idioma" 
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          required>
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700">Código ISO</label>
+        <input 
+          type="text" 
+          [(ngModel)]="idioma.codigo_iso" 
+          name="codigo_iso" 
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          maxlength="3"
+          pattern="[A-Za-z]{2,3}"
+          title="Código ISO de 2-3 caracteres"
+          required>
+        <p class="text-xs text-gray-500 mt-1">Ejemplo: ES, EN, FR, DE</p>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button 
+          type="button" 
+          (click)="onCancelar()" 
+          class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
+          Cancelar
+        </button>
+        <button 
+          type="submit" 
+          class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">
+          Guardar
+        </button>
+      </div>
+    </form>
+  </div>
+</div> 

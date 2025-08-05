@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SidebarComponent } from './components/sidebar.component';
-import { ModulosTableComponent } from './components/modulos-table/modulos-table.component';
-import { EtiquetasTableComponent } from './components/etiquetas-table/etiquetas-table.component';
-import { IdiomasTableComponent } from './components/idiomas-table/idiomas-table.component';
+import { SidebarComponent } from './microfrontends/sidebar/sidebar.component';
+import { ModulosTableComponent } from './microfrontends/modulos/modulos-table/modulos-table.component';
+import { EtiquetasTableComponent } from './microfrontends/etiquetas/etiquetas-table/etiquetas-table.component';
+import { IdiomasTableComponent } from './microfrontends/idiomas/idiomas-table/idiomas-table.component';
 
 @Component({
   selector: 'app-root',
