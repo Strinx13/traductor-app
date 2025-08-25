@@ -17,13 +17,15 @@
           [(ngModel)]="etiqueta.id_modulo" 
           name="id_modulo" 
           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" 
-          [disabled]="!modoEdicion"
+          [disabled]="modoEdicion"
+          [class.bg-gray-100]="modoEdicion"
           required>
           <option [ngValue]="0">Seleccione un módulo</option>
           <option *ngFor="let modulo of modulos" [ngValue]="modulo.id_modulo">
             {{ modulo.nombre_modulo }}
           </option>
         </select>
+        <p *ngIf="modoEdicion" class="text-xs text-gray-500 mt-1">El módulo no se puede modificar en modo edición</p>
       </div>
       <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700">Porcentaje de Traducción</label>
@@ -32,9 +34,12 @@
           [(ngModel)]="etiqueta.porcentaje_traduccion" 
           name="porcentaje_traduccion" 
           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          [class.bg-gray-100]="modoEdicion"
+          [readonly]="modoEdicion"
           min="0"
           max="100"
           required>
+        <p *ngIf="modoEdicion" class="text-xs text-gray-500 mt-1">El porcentaje de traducción no se puede modificar en modo edición</p>
       </div>
       <div class="flex justify-end gap-2">
         <button 

@@ -41,28 +41,40 @@
       </button>
     </div>
 
-    <!-- Lista de traducciones existentes -->
+    <!-- Lista de traducciones existentes con drag & drop -->
     <div class="mb-4">
       <h4 class="font-semibold mb-3">Traducciones Existentes</h4>
       <div class="overflow-x-auto">
         <table class="min-w-full text-sm text-left border border-gray-200 rounded">
           <thead class="bg-gray-200">
             <tr>
+              <th class="px-3 py-2 w-8">#</th>
               <th class="px-3 py-2">Idioma</th>
               <th class="px-3 py-2">Código ISO</th>
               <th class="px-3 py-2">Traducción</th>
               <th class="px-3 py-2">Acciones</th>
             </tr>
           </thead>
-          <tbody>
-            <tr *ngFor="let traduccion of traducciones" class="bg-white border-b">
+          <tbody cdkDropList (cdkDropListDropped)="onDrop($event)" class="traducciones-drop-list">
+            <tr *ngFor="let traduccion of traducciones; let i = index" 
+                cdkDrag 
+                class="bg-white border-b traduccion-row"
+                [class.dragging]="false">
+              <td class="px-3 py-2 w-8">
+                <div class="flex items-center justify-center">
+                  <span class="text-xs text-gray-500">{{ i + 1 }}</span>
+                  <div class="ml-2 cursor-move drag-handle">
+                    <i class="fi fi-br-grip-vertical text-gray-400"></i>
+                  </div>
+                </div>
+              </td>
               <td class="px-3 py-2">{{ getNombreIdioma(traduccion.id_idioma) }}</td>
               <td class="px-3 py-2">{{ traduccion.codigo_iso }}</td>
               <td class="px-3 py-2">
                 <div *ngIf="!modoEdicion || traduccionEditando?.id_traduccion !== traduccion.id_traduccion">
                   {{ traduccion.texto_traduccion }}
                 </div>
-                <div *ngIf="modoEdicion && traduccionEditando?.id_traduccion === traduccion.id_traduccion">
+                <div *ngIf="modoEdicion && traduccionEditando?.id_traduccion === traduccion.id_traduccion && traduccionEditando">
                   <input 
                     type="text" 
                     [(ngModel)]="traduccionEditando.texto_traduccion" 

@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { ModuloFormComponent } from '../modulo-form/modulo-form.component';
+import { ModulosService, Modulo, ModuloCreateRequest, ModuloUpdateRequest } from '../modulos.service';
+import { AlertService } from '../../../shared/services/alert.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-modulos-table',
@@ -11,26 +13,37 @@ import { ModuloFormComponent } from '../modulo-form/modulo-form.component';
   templateUrl: './modulos-table.component.html',
   styleUrls: ['./modulos-table.component.css']
 })
-export class ModulosTableComponent implements OnInit {
-  modulos: any[] = [];
-  moduloSeleccionado: any | null = null;
+export class ModulosTableComponent implements OnInit, OnDestroy {
+  modulos: Modulo[] = [];
+  moduloSeleccionado: Modulo | null = null;
   modoEdicion = false;
+  private subscription = new Subscription();
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private modulosService: ModulosService,
+    private alertService: AlertService
+  ) {}
 
   ngOnInit() {
     this.cargarModulos();
   }
 
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
   cargarModulos() {
-    this.http.get<any[]>('http://localhost:3000/api/modulos').subscribe({
-      next: (data) => {
-        this.modulos = data;
-      },
-      error: (error) => {
-        console.error('Error al cargar módulos:', error);
-      }
-    });
+    this.subscription.add(
+      this.modulosService.modulos$.subscribe({
+        next: (modulos) => {
+          this.modulos = modulos;
+        },
+        error: (error) => {
+          console.error('Error al cargar módulos:', error);
+          this.alertService.showError('Error', 'No se pudieron cargar los módulos');
+        }
+      })
+    );
   }
 
   agregarModulo() {
@@ -38,36 +51,43 @@ export class ModulosTableComponent implements OnInit {
     this.moduloSeleccionado = {
       id_modulo: 0,
       nombre_modulo: '',
-      porcentaje_avance: 0
+      porcentaje_avance: 0,
+      idiomas_seleccionados: []
     };
   }
 
-  editarModulo(modulo: any) {
+  editarModulo(modulo: Modulo) {
     this.modoEdicion = true;
     this.moduloSeleccionado = { ...modulo };
   }
 
-  guardarModulo(modulo: any) {
-    if (this.modoEdicion) {
-      this.http.put(`http://localhost:3000/api/modulos/${modulo.id_modulo}`, modulo).subscribe({
-        next: () => {
-          this.cargarModulos();
-          this.moduloSeleccionado = null;
-        },
-        error: (error) => {
-          console.error('Error al actualizar módulo:', error);
-        }
-      });
+  guardarModulo(moduloData: ModuloCreateRequest | ModuloUpdateRequest) {
+    if (this.modoEdicion && this.moduloSeleccionado) {
+      this.subscription.add(
+        this.modulosService.actualizarModulo(this.moduloSeleccionado.id_modulo, moduloData as ModuloUpdateRequest).subscribe({
+          next: () => {
+            this.moduloSeleccionado = null;
+            this.alertService.showSuccess('Éxito', 'Módulo actualizado correctamente');
+          },
+          error: (error) => {
+            console.error('Error al actualizar módulo:', error);
+            this.alertService.showError('Error', 'No se pudo actualizar el módulo');
+          }
+        })
+      );
     } else {
-      this.http.post('http://localhost:3000/api/modulos', modulo).subscribe({
-        next: () => {
-          this.cargarModulos();
-          this.moduloSeleccionado = null;
-        },
-        error: (error) => {
-          console.error('Error al crear módulo:', error);
-        }
-      });
+      this.subscription.add(
+        this.modulosService.crearModulo(moduloData as ModuloCreateRequest).subscribe({
+          next: () => {
+            this.moduloSeleccionado = null;
+            this.alertService.showSuccess('Éxito', 'Módulo creado correctamente');
+          },
+          error: (error) => {
+            console.error('Error al crear módulo:', error);
+            this.alertService.showError('Error', 'No se pudo crear el módulo');
+          }
+        })
+      );
     }
   }
 
@@ -75,21 +95,42 @@ export class ModulosTableComponent implements OnInit {
     this.moduloSeleccionado = null;
   }
 
-  exportarModulo(modulo: any) {
-    // Implementar lógica de exportación
-    console.log('Exportar módulo:', modulo);
+  exportarModulo(modulo: Modulo) {
+    // Crear un enlace temporal para descargar el archivo
+    const link = document.createElement('a');
+    link.href = `http://localhost:3000/api/etiquetas/export/translations/${modulo.id_modulo}`;
+    link.download = `${modulo.nombre_modulo.replace(/\s+/g, '')}Translation.ts`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    this.alertService.showSuccess('Éxito', 'Archivo exportado correctamente');
   }
 
-  eliminarModulo(modulo: any) {
-    if (confirm('¿Está seguro de que desea eliminar este módulo?')) {
-      this.http.delete(`http://localhost:3000/api/modulos/${modulo.id_modulo}`).subscribe({
-        next: () => {
-          this.cargarModulos();
-        },
-        error: (error) => {
-          console.error('Error al eliminar módulo:', error);
-        }
-      });
+  eliminarModulo(modulo: Modulo) {
+    this.alertService.showConfirm(
+      'Confirmar eliminación', 
+      `¿Está seguro de que desea eliminar el módulo "${modulo.nombre_modulo}"?`
+    ).subscribe(confirmed => {
+      if (confirmed) {
+        this.subscription.add(
+          this.modulosService.eliminarModulo(modulo.id_modulo).subscribe({
+            next: () => {
+              this.alertService.showSuccess('Éxito', 'Módulo eliminado correctamente');
+            },
+            error: (error) => {
+              console.error('Error al eliminar módulo:', error);
+              this.alertService.showError('Error', 'No se pudo eliminar el módulo');
+            }
+          })
+        );
+      }
+    });
+  }
+
+  getIdsIdiomasSeleccionados(modulo: Modulo): string {
+    if (!modulo.idiomas_seleccionados || modulo.idiomas_seleccionados.length === 0) {
+      return 'Ninguno';
     }
+    return modulo.idiomas_seleccionados.map(i => i.codigo_iso).join(', ');
   }
 }

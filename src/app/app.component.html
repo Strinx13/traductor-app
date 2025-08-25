@@ -9,3 +9,11 @@
     </div>
   </main>
 </div>
+
+<!-- Modal de alertas global -->
+<app-alert-modal 
+  [data]="alertData.data"
+  [isVisible]="alertData.isVisible"
+  (confirm)="onAlertConfirm()"
+  (cancel)="onAlertCancel()">
+</app-alert-modal>

@@ -36,3 +36,87 @@
 .action-button:hover {
   transform: scale(1.05);
 } 
+
+/* Estilos para el modal de traducciones */
+.modal-overlay {
+  backdrop-filter: blur(2px);
+}
+
+.form-container {
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Estilos para drag & drop */
+.traducciones-drop-list {
+  min-height: 50px;
+}
+
+.traduccion-row {
+  transition: all 0.2s ease;
+}
+
+.traduccion-row:hover {
+  background-color: #f8fafc;
+}
+
+.traduccion-row.cdk-drag-preview {
+  background-color: white;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  opacity: 0.9;
+}
+
+.traduccion-row.cdk-drag-placeholder {
+  opacity: 0.3;
+  background-color: #e2e8f0;
+}
+
+.traduccion-row.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.drag-handle {
+  cursor: grab;
+  transition: color 0.2s ease;
+}
+
+.drag-handle:hover {
+  color: #6b7280;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Estilos para el indicador de orden */
+.traduccion-row td:first-child {
+  background-color: #f9fafb;
+  border-right: 1px solid #e5e7eb;
+}
+
+/* Animación para el cambio de orden */
+.traduccion-row {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+} 

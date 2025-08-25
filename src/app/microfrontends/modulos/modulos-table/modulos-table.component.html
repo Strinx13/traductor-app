@@ -11,6 +11,7 @@
         <tr>
           <th class="px-3 py-2">ID</th>
           <th class="px-3 py-2">Nombre</th>
+          <th class="px-3 py-2">Idiomas Seleccionados</th>
           <th class="px-3 py-2">Porcentaje de Avance</th>
           <th class="px-3 py-2">Acciones</th>
         </tr>
@@ -19,7 +20,19 @@
         <tr *ngFor="let modulo of modulos" class="bg-white border-b">
           <td class="px-3 py-2">{{ modulo.id_modulo }}</td>
           <td class="px-3 py-2">{{ modulo.nombre_modulo }}</td>
-          <td class="px-3 py-2">{{ modulo.porcentaje_avance }}%</td>
+          <td class="px-3 py-2">
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              {{ getIdsIdiomasSeleccionados(modulo) }}
+            </span>
+          </td>
+          <td class="px-3 py-2">
+            <div class="flex items-center">
+              <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                <div class="bg-blue-600 h-2 rounded-full" [style.width.%]="modulo.porcentaje_avance"></div>
+              </div>
+              <span class="text-xs">{{ modulo.porcentaje_avance }}%</span>
+            </div>
+          </td>
           <td class="px-3 py-2 flex gap-2">
             <button class="bg-yellow-200 hover:bg-yellow-300 text-gray-900 px-2 py-1 rounded text-xs font-semibold" (click)="editarModulo(modulo)">
               <i class="fi fi-br-edit"></i>
