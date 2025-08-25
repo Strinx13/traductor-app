@@ -1,7 +1,7 @@
 <div class="bg-white rounded-lg shadow p-6">
   <div class="flex justify-between items-center mb-4">
     <h2 class="text-lg font-bold">Etiquetas</h2>
-    <button class="rounded" (click)="agregarEtiqueta()" [disabled]="!moduloSeleccionado">
+    <button *ngIf="moduloSeleccionado" class="rounded" (click)="agregarEtiqueta()">
       <i class="fi fi-br-plus"></i>
     </button>
   </div>

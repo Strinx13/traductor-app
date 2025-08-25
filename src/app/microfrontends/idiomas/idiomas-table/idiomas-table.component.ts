@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { IdiomaFormComponent } from '../idioma-form/idioma-form.component';
-import { AlertService } from '../../../shared/services/alert.service';
+import { NotificationService } from '../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-idiomas-table',
@@ -19,7 +19,7 @@ export class IdiomasTableComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private alertService: AlertService
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
@@ -33,7 +33,7 @@ export class IdiomasTableComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error al cargar idiomas:', error);
-        this.alertService.showError('Error', 'No se pudieron cargar los idiomas');
+        this.notificationService.showError('Error', 'No se pudieron cargar los idiomas');
       }
     });
   }
@@ -58,11 +58,11 @@ export class IdiomasTableComponent implements OnInit {
         next: () => {
           this.cargarIdiomas();
           this.idiomaSeleccionado = null;
-          this.alertService.showSuccess('Éxito', 'Idioma actualizado correctamente');
+          this.notificationService.showManualSuccess('Éxito', 'Idioma actualizado correctamente');
         },
         error: (error) => {
           console.error('Error al actualizar idioma:', error);
-          this.alertService.showError('Error', 'No se pudo actualizar el idioma');
+          this.notificationService.showManualError('Error', 'No se pudo actualizar el idioma');
         }
       });
     } else {
@@ -70,11 +70,11 @@ export class IdiomasTableComponent implements OnInit {
         next: () => {
           this.cargarIdiomas();
           this.idiomaSeleccionado = null;
-          this.alertService.showSuccess('Éxito', 'Idioma creado correctamente');
+          this.notificationService.showManualSuccess('Éxito', 'Idioma creado correctamente');
         },
         error: (error) => {
           console.error('Error al crear idioma:', error);
-          this.alertService.showError('Error', 'No se pudo crear el idioma');
+          this.notificationService.showManualError('Error', 'No se pudo crear el idioma');
         }
       });
     }
@@ -84,23 +84,19 @@ export class IdiomasTableComponent implements OnInit {
     this.idiomaSeleccionado = null;
   }
 
-  eliminarIdioma(idioma: any) {
-    this.alertService.showConfirm(
-      'Confirmar eliminación',
-      `¿Está seguro de que desea eliminar el idioma "${idioma.nombre_idioma}"?`
-    ).subscribe(confirmed => {
-      if (confirmed) {
-        this.http.delete(`http://localhost:3000/api/idiomas/${idioma.id_idioma}`).subscribe({
-          next: () => {
-            this.cargarIdiomas();
-            this.alertService.showSuccess('Éxito', 'Idioma eliminado correctamente');
-          },
-          error: (error) => {
-            console.error('Error al eliminar idioma:', error);
-            this.alertService.showError('Error', 'No se pudo eliminar el idioma');
-          }
-        });
-      }
-    });
+  async eliminarIdioma(idioma: any) {
+    const confirmed = await this.notificationService.showConfirmDelete('el idioma');
+    if (confirmed) {
+      this.http.delete(`http://localhost:3000/api/idiomas/${idioma.id_idioma}`).subscribe({
+        next: () => {
+          this.cargarIdiomas();
+          this.notificationService.showManualSuccess('Éxito', 'Idioma eliminado correctamente');
+        },
+        error: (error) => {
+          console.error('Error al eliminar idioma:', error);
+          this.notificationService.showManualError('Error', 'No se pudo eliminar el idioma');
+        }
+      });
+    }
   }
 }

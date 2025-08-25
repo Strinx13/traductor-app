@@ -6,7 +6,7 @@ import { TraduccionesComponent } from '../traducciones/traducciones.component';
 import { EtiquetasService, Etiqueta } from '../etiquetas.service';
 import { ModulosService } from '../../modulos/modulos.service';
 import { IdiomasService } from '../../idiomas/idiomas.service';
-import { AlertService } from '../../../shared/services/alert.service';
+import { NotificationService } from '../../../shared/services/notification.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -31,7 +31,7 @@ export class EtiquetasTableComponent implements OnInit, OnDestroy {
     private etiquetasService: EtiquetasService,
     private modulosService: ModulosService,
     private idiomasService: IdiomasService,
-    private alertService: AlertService
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
@@ -57,7 +57,7 @@ export class EtiquetasTableComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error al cargar etiquetas:', error);
-          this.alertService.showError('Error', 'No se pudieron cargar las etiquetas');
+          this.notificationService.showError('Error', 'No se pudieron cargar las etiquetas');
         }
       })
     );
@@ -71,7 +71,7 @@ export class EtiquetasTableComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error al cargar módulos:', error);
-          this.alertService.showError('Error', 'No se pudieron cargar los módulos');
+          this.notificationService.showError('Error', 'No se pudieron cargar los módulos');
         }
       })
     );
@@ -85,7 +85,7 @@ export class EtiquetasTableComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error al cargar idiomas:', error);
-          this.alertService.showError('Error', 'No se pudieron cargar los idiomas');
+          this.notificationService.showError('Error', 'No se pudieron cargar los idiomas');
         }
       })
     );
@@ -93,7 +93,7 @@ export class EtiquetasTableComponent implements OnInit, OnDestroy {
 
   agregarEtiqueta() {
     if (!this.moduloSeleccionado) {
-      this.alertService.showWarning('Selección requerida', 'Por favor selecciona un módulo primero');
+      this.notificationService.showWarning('Selección requerida', 'Por favor selecciona un módulo primero');
       return;
     }
     this.modoEdicion = false;
@@ -114,14 +114,14 @@ export class EtiquetasTableComponent implements OnInit, OnDestroy {
     if (this.modoEdicion) {
       this.subscription.add(
         this.etiquetasService.actualizarEtiqueta(etiqueta.id_etiqueta, etiqueta).subscribe({
-          next: () => {
-            this.etiquetaSeleccionada = null;
-            this.alertService.showSuccess('Éxito', 'Etiqueta actualizada correctamente');
-          },
-          error: (error) => {
-            console.error('Error al actualizar etiqueta:', error);
-            this.alertService.showError('Error', 'No se pudo actualizar la etiqueta');
-          }
+                  next: () => {
+          this.etiquetaSeleccionada = null;
+          this.notificationService.showManualSuccess('Éxito', 'Etiqueta actualizada correctamente');
+        },
+        error: (error) => {
+          console.error('Error al actualizar etiqueta:', error);
+          this.notificationService.showManualError('Error', 'No se pudo actualizar la etiqueta');
+        }
         })
       );
     } else {
@@ -132,14 +132,14 @@ export class EtiquetasTableComponent implements OnInit, OnDestroy {
       };
       this.subscription.add(
         this.etiquetasService.crearEtiqueta(nuevaEtiqueta).subscribe({
-          next: () => {
-            this.etiquetaSeleccionada = null;
-            this.alertService.showSuccess('Éxito', 'Etiqueta creada correctamente');
-          },
-          error: (error) => {
-            console.error('Error al crear etiqueta:', error);
-            this.alertService.showError('Error', 'No se pudo crear la etiqueta');
-          }
+                  next: () => {
+          this.etiquetaSeleccionada = null;
+          this.notificationService.showManualSuccess('Éxito', 'Etiqueta creada correctamente');
+        },
+        error: (error) => {
+          console.error('Error al crear etiqueta:', error);
+          this.notificationService.showManualError('Error', 'No se pudo crear la etiqueta');
+        }
         })
       );
     }
@@ -166,14 +166,14 @@ export class EtiquetasTableComponent implements OnInit, OnDestroy {
             },
             error: (error) => {
               console.error('Error al obtener idiomas del módulo:', error);
-              this.alertService.showError('Error', 'No se pudieron cargar los idiomas del módulo');
+              this.notificationService.showError('Error', 'No se pudieron cargar los idiomas del módulo');
             }
           })
         );
       }
     } catch (error) {
       console.error('Error al obtener idiomas del módulo:', error);
-      this.alertService.showError('Error', 'No se pudieron cargar los idiomas del módulo');
+      this.notificationService.showError('Error', 'No se pudieron cargar los idiomas del módulo');
     }
   }
 
@@ -182,25 +182,21 @@ export class EtiquetasTableComponent implements OnInit, OnDestroy {
     this.idiomasSeleccionadosModulo = [];
   }
 
-  eliminarEtiqueta(etiqueta: Etiqueta) {
-    this.alertService.showConfirm(
-      'Confirmar eliminación',
-      `¿Está seguro de que desea eliminar la etiqueta "${etiqueta.descripcion_etiqueta}"?`
-    ).subscribe(confirmed => {
-      if (confirmed) {
-        this.subscription.add(
-          this.etiquetasService.eliminarEtiqueta(etiqueta.id_etiqueta).subscribe({
-            next: () => {
-              this.alertService.showSuccess('Éxito', 'Etiqueta eliminada correctamente');
-            },
-            error: (error) => {
-              console.error('Error al eliminar etiqueta:', error);
-              this.alertService.showError('Error', 'No se pudo eliminar la etiqueta');
-            }
-          })
-        );
-      }
-    });
+  async eliminarEtiqueta(etiqueta: Etiqueta) {
+    const confirmed = await this.notificationService.showConfirmDelete('la etiqueta');
+    if (confirmed) {
+      this.subscription.add(
+        this.etiquetasService.eliminarEtiqueta(etiqueta.id_etiqueta).subscribe({
+          next: () => {
+            this.notificationService.showManualSuccess('Éxito', 'Etiqueta eliminada correctamente');
+          },
+          error: (error) => {
+            console.error('Error al eliminar etiqueta:', error);
+            this.notificationService.showManualError('Error', 'No se pudo eliminar la etiqueta');
+          }
+        })
+      );
+    }
   }
 
   getNombreModulo(idModulo: number): string {

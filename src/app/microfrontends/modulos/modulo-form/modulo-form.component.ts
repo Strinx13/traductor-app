@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IdiomasService, Idioma } from '../../idiomas/idiomas.service';
 import { Modulo, ModuloCreateRequest, ModuloUpdateRequest } from '../modulos.service';
-import { AlertService } from '../../../shared/services/alert.service';
+import { NotificationService } from '../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-modulo-form',
@@ -24,7 +24,7 @@ export class ModuloFormComponent implements OnInit {
 
   constructor(
     private idiomasService: IdiomasService,
-    private alertService: AlertService
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
@@ -39,7 +39,7 @@ export class ModuloFormComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error al cargar idiomas:', error);
-        this.alertService.showError('Error', 'No se pudieron cargar los idiomas');
+        this.notificationService.showError('Error', 'No se pudieron cargar los idiomas');
       }
     });
   }
@@ -69,12 +69,12 @@ export class ModuloFormComponent implements OnInit {
 
   async onGuardar() {
     if (!this.nombreModulo.trim()) {
-      this.alertService.showWarning('Validación', 'Por favor ingresa un nombre para el módulo');
+      this.notificationService.showValidationError('nombre del módulo');
       return;
     }
 
     if (this.idiomasSeleccionados.length === 0) {
-      this.alertService.showWarning('Validación', 'Por favor selecciona al menos un idioma');
+      this.notificationService.showWarning('Validación', 'Por favor selecciona al menos un idioma');
       return;
     }
 

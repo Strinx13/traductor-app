@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ModuloFormComponent } from '../modulo-form/modulo-form.component';
 import { ModulosService, Modulo, ModuloCreateRequest, ModuloUpdateRequest } from '../modulos.service';
-import { AlertService } from '../../../shared/services/alert.service';
+import { NotificationService } from '../../../shared/services/notification.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -21,7 +21,7 @@ export class ModulosTableComponent implements OnInit, OnDestroy {
 
   constructor(
     private modulosService: ModulosService,
-    private alertService: AlertService
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
@@ -40,7 +40,7 @@ export class ModulosTableComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error al cargar módulos:', error);
-          this.alertService.showError('Error', 'No se pudieron cargar los módulos');
+          this.notificationService.showError('Error', 'No se pudieron cargar los módulos');
         }
       })
     );
@@ -67,11 +67,11 @@ export class ModulosTableComponent implements OnInit, OnDestroy {
         this.modulosService.actualizarModulo(this.moduloSeleccionado.id_modulo, moduloData as ModuloUpdateRequest).subscribe({
           next: () => {
             this.moduloSeleccionado = null;
-            this.alertService.showSuccess('Éxito', 'Módulo actualizado correctamente');
+            this.notificationService.showManualSuccess('Éxito', 'Módulo actualizado correctamente');
           },
           error: (error) => {
             console.error('Error al actualizar módulo:', error);
-            this.alertService.showError('Error', 'No se pudo actualizar el módulo');
+            this.notificationService.showManualError('Error', 'No se pudo actualizar el módulo');
           }
         })
       );
@@ -80,11 +80,11 @@ export class ModulosTableComponent implements OnInit, OnDestroy {
         this.modulosService.crearModulo(moduloData as ModuloCreateRequest).subscribe({
           next: () => {
             this.moduloSeleccionado = null;
-            this.alertService.showSuccess('Éxito', 'Módulo creado correctamente');
+            this.notificationService.showManualSuccess('Éxito', 'Módulo creado correctamente');
           },
           error: (error) => {
             console.error('Error al crear módulo:', error);
-            this.alertService.showError('Error', 'No se pudo crear el módulo');
+            this.notificationService.showManualError('Error', 'No se pudo crear el módulo');
           }
         })
       );
@@ -103,28 +103,24 @@ export class ModulosTableComponent implements OnInit, OnDestroy {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    this.alertService.showSuccess('Éxito', 'Archivo exportado correctamente');
+    this.notificationService.showExportSuccess();
   }
 
-  eliminarModulo(modulo: Modulo) {
-    this.alertService.showConfirm(
-      'Confirmar eliminación', 
-      `¿Está seguro de que desea eliminar el módulo "${modulo.nombre_modulo}"?`
-    ).subscribe(confirmed => {
-      if (confirmed) {
-        this.subscription.add(
-          this.modulosService.eliminarModulo(modulo.id_modulo).subscribe({
-            next: () => {
-              this.alertService.showSuccess('Éxito', 'Módulo eliminado correctamente');
-            },
-            error: (error) => {
-              console.error('Error al eliminar módulo:', error);
-              this.alertService.showError('Error', 'No se pudo eliminar el módulo');
-            }
-          })
-        );
-      }
-    });
+  async eliminarModulo(modulo: Modulo) {
+    const confirmed = await this.notificationService.showConfirmDelete('el módulo');
+    if (confirmed) {
+      this.subscription.add(
+        this.modulosService.eliminarModulo(modulo.id_modulo).subscribe({
+          next: () => {
+            this.notificationService.showManualSuccess('Éxito', 'Módulo eliminado correctamente');
+          },
+          error: (error) => {
+            console.error('Error al eliminar módulo:', error);
+            this.notificationService.showManualError('Error', 'No se pudo eliminar el módulo');
+          }
+        })
+      );
+    }
   }
 
   getIdsIdiomasSeleccionados(modulo: Modulo): string {
