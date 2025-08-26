@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ModuloFormComponent } from '../modulo-form/modulo-form.component';
 import { ModulosService, Modulo, ModuloCreateRequest, ModuloUpdateRequest } from '../modulos.service';
 import { NotificationService } from '../../../shared/services/notification.service';
+import { ToastService } from '../../../shared/services/toast.service';
+import { ValidationService } from '../../../shared/services/validation.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -21,7 +23,9 @@ export class ModulosTableComponent implements OnInit, OnDestroy {
 
   constructor(
     private modulosService: ModulosService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private toastService: ToastService,
+    private validationService: ValidationService
   ) {}
 
   ngOnInit() {
@@ -68,10 +72,12 @@ export class ModulosTableComponent implements OnInit, OnDestroy {
           next: () => {
             this.moduloSeleccionado = null;
             this.notificationService.showManualSuccess('Éxito', 'Módulo actualizado correctamente');
+            this.toastService.showSuccess('Módulo actualizado satisfactoriamente');
           },
           error: (error) => {
             console.error('Error al actualizar módulo:', error);
             this.notificationService.showManualError('Error', 'No se pudo actualizar el módulo');
+            this.toastService.showError('Error al actualizar el módulo');
           }
         })
       );
@@ -81,10 +87,12 @@ export class ModulosTableComponent implements OnInit, OnDestroy {
           next: () => {
             this.moduloSeleccionado = null;
             this.notificationService.showManualSuccess('Éxito', 'Módulo creado correctamente');
+            this.toastService.showSuccess('Módulo creado satisfactoriamente');
           },
           error: (error) => {
             console.error('Error al crear módulo:', error);
             this.notificationService.showManualError('Error', 'No se pudo crear el módulo');
+            this.toastService.showError('Error al crear el módulo');
           }
         })
       );
@@ -96,14 +104,53 @@ export class ModulosTableComponent implements OnInit, OnDestroy {
   }
 
   exportarModulo(modulo: Modulo) {
-    // Crear un enlace temporal para descargar el archivo
-    const link = document.createElement('a');
-    link.href = `http://localhost:3000/api/etiquetas/export/translations/${modulo.id_modulo}`;
-    link.download = `${modulo.nombre_modulo.replace(/\s+/g, '')}Translation.ts`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    this.notificationService.showExportSuccess();
+    
+
+    const timeoutId = setTimeout(() => {
+      this.toastService.showWarning('No se puede exportar: El módulo no tiene traducciones');
+    }, 50); 
+    
+    // Verificar si el módulo tiene traducciones antes de intentar exportar
+    fetch(`http://localhost:3000/api/etiquetas/export/translations/${modulo.id_modulo}`)
+      .then(response => {
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          return response.json().then(errorData => {
+            throw new Error(errorData.message || 'Error al exportar');
+          });
+        }
+        return response.blob();
+      })
+      .then(blob => {
+        clearTimeout(timeoutId);
+        
+        // Crear URL del blob y descargar
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${modulo.nombre_modulo.replace(/\s+/g, '')}Translation.ts`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        
+      })
+      .catch(error => {
+        clearTimeout(timeoutId);
+        
+        console.error('Error al exportar:', error);
+        
+        if (error.message && error.message.includes('No se puede exportar el módulo')) {
+          setTimeout(() => {
+            this.toastService.showWarning('No se puede exportar: El módulo no tiene traducciones');
+          }, 50);
+        } else {
+          setTimeout(() => {
+            this.toastService.showError('Error al exportar el módulo');
+          }, 50);
+        }
+      });
   }
 
   async eliminarModulo(modulo: Modulo) {
@@ -113,10 +160,12 @@ export class ModulosTableComponent implements OnInit, OnDestroy {
         this.modulosService.eliminarModulo(modulo.id_modulo).subscribe({
           next: () => {
             this.notificationService.showManualSuccess('Éxito', 'Módulo eliminado correctamente');
+            this.toastService.showSuccess('Módulo eliminado satisfactoriamente');
           },
           error: (error) => {
             console.error('Error al eliminar módulo:', error);
             this.notificationService.showManualError('Error', 'No se pudo eliminar el módulo');
+            this.toastService.showError('Error al eliminar el módulo');
           }
         })
       );

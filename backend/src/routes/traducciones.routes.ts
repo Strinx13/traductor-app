@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { pool } from '../config/database';
 import { ResultSetHeader } from 'mysql2';
+import { validateTraduccionData } from '../utils/validation';
 
 const router = Router();
 
@@ -59,6 +60,15 @@ router.post('/', async (req, res) => {
   try {
     const { id_etiqueta, id_idioma, texto_traduccion } = req.body;
     
+    // Validar datos de la traducción
+    const validation = validateTraduccionData({ id_etiqueta, id_idioma, texto_traduccion });
+    if (!validation.isValid) {
+      return res.status(400).json({
+        message: 'Datos de la traducción inválidos',
+        errors: validation.errors
+      });
+    }
+    
     // Verificar si ya existe una traducción para esta etiqueta e idioma
     const [existing] = await pool.query(
       'SELECT * FROM traducciones WHERE id_etiqueta = ? AND id_idioma = ?',
@@ -101,6 +111,19 @@ router.put('/:id', async (req, res) => {
   try {
     const { texto_traduccion } = req.body;
     const id_traduccion = req.params.id;
+
+    // Validar datos de la traducción
+    const validation = validateTraduccionData({ 
+      id_etiqueta: 0, // No se valida en actualización
+      id_idioma: 0,   // No se valida en actualización
+      texto_traduccion 
+    });
+    if (!validation.isValid) {
+      return res.status(400).json({
+        message: 'Datos de la traducción inválidos',
+        errors: validation.errors.filter(error => error.includes('texto_traduccion'))
+      });
+    }
 
     await pool.query(
       'UPDATE traducciones SET texto_traduccion = ? WHERE id_traduccion = ?',

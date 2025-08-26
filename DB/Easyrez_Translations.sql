@@ -1,3 +1,4 @@
+CREATE DATABASE easyrez_translations
 USE easyrez_translations;
 select * from  orden;
 

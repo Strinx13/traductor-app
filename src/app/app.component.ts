@@ -5,6 +5,7 @@ import { ModulosTableComponent } from './microfrontends/modulos/modulos-table/mo
 import { EtiquetasTableComponent } from './microfrontends/etiquetas/etiquetas-table/etiquetas-table.component';
 import { IdiomasTableComponent } from './microfrontends/idiomas/idiomas-table/idiomas-table.component';
 import { AlertModalComponent } from './shared/alert-modal/alert-modal.component';
+import { ToastComponent } from './shared/components/toast/toast.component';
 import { AlertService } from './shared/services/alert.service';
 
 @Component({
@@ -16,7 +17,8 @@ import { AlertService } from './shared/services/alert.service';
     ModulosTableComponent, 
     EtiquetasTableComponent, 
     IdiomasTableComponent,
-    AlertModalComponent
+    AlertModalComponent,
+    ToastComponent
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']

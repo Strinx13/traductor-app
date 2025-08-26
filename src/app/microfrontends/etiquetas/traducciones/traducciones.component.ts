@@ -5,6 +5,7 @@ import { CdkDragDrop, CdkDropList, CdkDrag, moveItemInArray } from '@angular/cdk
 import { TraduccionesService, Traduccion, TraduccionOrdenRequest } from '../traducciones.service';
 import { AlertService } from '../../../shared/services/alert.service';
 import { Subscription } from 'rxjs';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-traducciones',
@@ -30,7 +31,8 @@ export class TraduccionesComponent implements OnInit, OnDestroy {
 
   constructor(
     private traduccionesService: TraduccionesService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -74,10 +76,12 @@ export class TraduccionesComponent implements OnInit, OnDestroy {
             texto_traduccion: ''
           };
           this.alertService.showSuccess('Éxito', 'Traducción agregada correctamente');
+          this.toastService.showSuccess('Traducción creada satisfactoriamente');
         },
         error: (error) => {
           console.error('Error al crear traducción:', error);
           this.alertService.showError('Error', 'No se pudo agregar la traducción');
+          this.toastService.showError('Error al crear la traducción');
         }
       })
     );
@@ -104,10 +108,12 @@ export class TraduccionesComponent implements OnInit, OnDestroy {
           this.cargarTraducciones();
           this.cancelarEdicion();
           this.alertService.showSuccess('Éxito', 'Traducción actualizada correctamente');
+          this.toastService.showSuccess('Traducción actualizada satisfactoriamente');
         },
         error: (error) => {
           console.error('Error al actualizar traducción:', error);
           this.alertService.showError('Error', 'No se pudo actualizar la traducción');
+          this.toastService.showError('Error al actualizar la traducción');
         }
       })
     );
@@ -125,10 +131,12 @@ export class TraduccionesComponent implements OnInit, OnDestroy {
             next: () => {
               this.cargarTraducciones();
               this.alertService.showSuccess('Éxito', 'Traducción eliminada correctamente');
+              this.toastService.showSuccess('Traducción eliminada satisfactoriamente');
             },
             error: (error) => {
               console.error('Error al eliminar traducción:', error);
               this.alertService.showError('Error', 'No se pudo eliminar la traducción');
+              this.toastService.showError('Error al eliminar la traducción');
             }
           })
         );

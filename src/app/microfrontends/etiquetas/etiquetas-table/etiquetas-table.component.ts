@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { EtiquetaFormComponent } from '../etiqueta-form/etiqueta-form.component';
 import { TraduccionesComponent } from '../traducciones/traducciones.component';
 import { EtiquetasService, Etiqueta } from '../etiquetas.service';
@@ -8,6 +9,7 @@ import { ModulosService } from '../../modulos/modulos.service';
 import { IdiomasService } from '../../idiomas/idiomas.service';
 import { NotificationService } from '../../../shared/services/notification.service';
 import { Subscription } from 'rxjs';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-etiquetas-table',
@@ -31,7 +33,9 @@ export class EtiquetasTableComponent implements OnInit, OnDestroy {
     private etiquetasService: EtiquetasService,
     private modulosService: ModulosService,
     private idiomasService: IdiomasService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private http: HttpClient,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -117,10 +121,14 @@ export class EtiquetasTableComponent implements OnInit, OnDestroy {
                   next: () => {
           this.etiquetaSeleccionada = null;
           this.notificationService.showManualSuccess('Éxito', 'Etiqueta actualizada correctamente');
+          this.cargarEtiquetas();
+          this.cargarModulos(); // Recargar módulos para actualizar porcentajes
+          this.toastService.showSuccess('Etiqueta actualizada satisfactoriamente');
         },
         error: (error) => {
           console.error('Error al actualizar etiqueta:', error);
           this.notificationService.showManualError('Error', 'No se pudo actualizar la etiqueta');
+          this.toastService.showError('Error al actualizar la etiqueta');
         }
         })
       );
@@ -135,10 +143,14 @@ export class EtiquetasTableComponent implements OnInit, OnDestroy {
                   next: () => {
           this.etiquetaSeleccionada = null;
           this.notificationService.showManualSuccess('Éxito', 'Etiqueta creada correctamente');
+          this.cargarEtiquetas();
+          this.cargarModulos(); // Recargar módulos para actualizar porcentajes
+          this.toastService.showSuccess('Etiqueta creada satisfactoriamente');
         },
         error: (error) => {
           console.error('Error al crear etiqueta:', error);
           this.notificationService.showManualError('Error', 'No se pudo crear la etiqueta');
+          this.toastService.showError('Error al crear la etiqueta');
         }
         })
       );
@@ -189,10 +201,14 @@ export class EtiquetasTableComponent implements OnInit, OnDestroy {
         this.etiquetasService.eliminarEtiqueta(etiqueta.id_etiqueta).subscribe({
           next: () => {
             this.notificationService.showManualSuccess('Éxito', 'Etiqueta eliminada correctamente');
+            this.cargarEtiquetas();
+            this.cargarModulos(); // Recargar módulos para actualizar porcentajes
+            this.toastService.showSuccess('Etiqueta eliminada satisfactoriamente');
           },
           error: (error) => {
             console.error('Error al eliminar etiqueta:', error);
             this.notificationService.showManualError('Error', 'No se pudo eliminar la etiqueta');
+            this.toastService.showError('Error al eliminar la etiqueta');
           }
         })
       );

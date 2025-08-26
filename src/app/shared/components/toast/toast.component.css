@@ -1,0 +1,49 @@
+/* Animaciones para el toast */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.toast-enter {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.toast-leave {
+  animation: slideOutRight 0.3s ease-in;
+}
+
+/* Hover effects */
+.toast:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .fixed.top-4.right-4 {
+    top: 1rem;
+    right: 1rem;
+    left: 1rem;
+  }
+  
+  .max-w-sm {
+    max-width: none;
+  }
+}

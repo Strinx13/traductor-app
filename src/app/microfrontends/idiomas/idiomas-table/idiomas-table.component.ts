@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { IdiomaFormComponent } from '../idioma-form/idioma-form.component';
 import { NotificationService } from '../../../shared/services/notification.service';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-idiomas-table',
@@ -19,7 +20,8 @@ export class IdiomasTableComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -59,10 +61,12 @@ export class IdiomasTableComponent implements OnInit {
           this.cargarIdiomas();
           this.idiomaSeleccionado = null;
           this.notificationService.showManualSuccess('Éxito', 'Idioma actualizado correctamente');
+          this.toastService.showSuccess('Idioma actualizado satisfactoriamente');
         },
         error: (error) => {
           console.error('Error al actualizar idioma:', error);
           this.notificationService.showManualError('Error', 'No se pudo actualizar el idioma');
+          this.toastService.showError('Error al actualizar el idioma');
         }
       });
     } else {
@@ -71,10 +75,12 @@ export class IdiomasTableComponent implements OnInit {
           this.cargarIdiomas();
           this.idiomaSeleccionado = null;
           this.notificationService.showManualSuccess('Éxito', 'Idioma creado correctamente');
+          this.toastService.showSuccess('Idioma creado satisfactoriamente');
         },
         error: (error) => {
           console.error('Error al crear idioma:', error);
           this.notificationService.showManualError('Error', 'No se pudo crear el idioma');
+          this.toastService.showError('Error al crear el idioma');
         }
       });
     }
@@ -91,10 +97,12 @@ export class IdiomasTableComponent implements OnInit {
         next: () => {
           this.cargarIdiomas();
           this.notificationService.showManualSuccess('Éxito', 'Idioma eliminado correctamente');
+          this.toastService.showSuccess('Idioma eliminado satisfactoriamente');
         },
         error: (error) => {
           console.error('Error al eliminar idioma:', error);
           this.notificationService.showManualError('Error', 'No se pudo eliminar el idioma');
+          this.toastService.showError('Error al eliminar el idioma');
         }
       });
     }

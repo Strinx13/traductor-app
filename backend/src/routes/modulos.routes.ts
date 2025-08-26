@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { pool } from '../config/database';
 import { ResultSetHeader } from 'mysql2';
+import { validateModuleData } from '../utils/validation';
 
 const router = Router();
 
@@ -182,98 +183,63 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Crear un nuevo módulo con idiomas seleccionados
+// Crear un nuevo módulo
 router.post('/', async (req, res) => {
   try {
-    const { nombre_modulo, idiomas_seleccionados } = req.body;
+    const { nombre_modulo } = req.body;
     
-    // Crear el módulo
+    // Validar datos del módulo
+    const validation = validateModuleData({ nombre_modulo });
+    if (!validation.isValid) {
+      return res.status(400).json({
+        message: 'Datos del módulo inválidos',
+        errors: validation.errors
+      });
+    }
+    
     const [result] = await pool.query<ResultSetHeader>(
       'INSERT INTO modulos (nombre_modulo, porcentaje_avance) VALUES (?, ?)',
       [nombre_modulo, 0.00]
     );
-    
-    const id_modulo = result.insertId;
-    
-    // Asignar idiomas seleccionados al módulo
-    if (Array.isArray(idiomas_seleccionados) && idiomas_seleccionados.length > 0) {
-      for (const id_idioma of idiomas_seleccionados) {
-        await pool.query(
-          'INSERT INTO modulo_idiomas (id_modulo, id_idioma) VALUES (?, ?)',
-          [id_modulo, id_idioma]
-        );
-      }
-    }
-    
-    // Obtener el módulo creado con sus idiomas
-    const [moduloCreado] = await pool.query(
-      'SELECT * FROM modulos WHERE id_modulo = ?',
-      [id_modulo]
-    );
-    
-    const [idiomas] = await pool.query(
-      `SELECT i.id_idioma, i.nombre_idioma, i.codigo_iso 
-       FROM idiomas i 
-       INNER JOIN modulo_idiomas mi ON i.id_idioma = mi.id_idioma 
-       WHERE mi.id_modulo = ?`,
-      [id_modulo]
-    );
-    
-    res.status(201).json({
-      ...(moduloCreado as any)[0],
-      idiomas_seleccionados: idiomas
+    res.status(201).json({ 
+      id_modulo: result.insertId, 
+      nombre_modulo, 
+      porcentaje_avance: 0.00 
     });
   } catch (error) {
     res.status(500).json({ message: 'Error al crear el módulo', error });
   }
 });
 
-// Actualizar un módulo con idiomas seleccionados
+// Actualizar un módulo
 router.put('/:id', async (req, res) => {
   try {
-    const { nombre_modulo, idiomas_seleccionados } = req.body;
-    const id_modulo = parseInt(req.params.id);
+    const { nombre_modulo } = req.body;
     
-    // Actualizar nombre del módulo
-    await pool.query(
-      'UPDATE modulos SET nombre_modulo = ? WHERE id_modulo = ?',
-      [nombre_modulo, id_modulo]
-    );
-    
-    // Eliminar idiomas anteriores
-    await pool.query('DELETE FROM modulo_idiomas WHERE id_modulo = ?', [id_modulo]);
-    
-    // Asignar nuevos idiomas seleccionados
-    if (Array.isArray(idiomas_seleccionados) && idiomas_seleccionados.length > 0) {
-      for (const id_idioma of idiomas_seleccionados) {
-        await pool.query(
-          'INSERT INTO modulo_idiomas (id_modulo, id_idioma) VALUES (?, ?)',
-          [id_modulo, id_idioma]
-        );
-      }
+    // Validar datos del módulo
+    const validation = validateModuleData({ nombre_modulo });
+    if (!validation.isValid) {
+      return res.status(400).json({
+        message: 'Datos del módulo inválidos',
+        errors: validation.errors
+      });
     }
     
-    // Actualizar el porcentaje de avance automáticamente
-    await actualizarPorcentajeAvanceModulo(id_modulo);
+    await pool.query(
+      'UPDATE modulos SET nombre_modulo = ? WHERE id_modulo = ?',
+      [nombre_modulo, req.params.id]
+    );
     
-    // Obtener el módulo actualizado con sus idiomas
+    // Actualizar el porcentaje de avance automáticamente
+    await actualizarPorcentajeAvanceModulo(parseInt(req.params.id));
+    
+    // Obtener el módulo actualizado
     const [modulo] = await pool.query(
       'SELECT * FROM modulos WHERE id_modulo = ?',
-      [id_modulo]
+      [req.params.id]
     );
     
-    const [idiomas] = await pool.query(
-      `SELECT i.id_idioma, i.nombre_idioma, i.codigo_iso 
-       FROM idiomas i 
-       INNER JOIN modulo_idiomas mi ON i.id_idioma = mi.id_idioma 
-       WHERE mi.id_modulo = ?`,
-      [id_modulo]
-    );
-    
-    res.json({
-      ...(modulo as any)[0],
-      idiomas_seleccionados: idiomas
-    });
+    res.json((modulo as any)[0]);
   } catch (error) {
     res.status(500).json({ message: 'Error al actualizar el módulo', error });
   }

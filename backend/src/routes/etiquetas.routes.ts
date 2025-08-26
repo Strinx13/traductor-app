@@ -1,6 +1,14 @@
 import { Router } from 'express';
 import { pool } from '../config/database';
 import { ResultSetHeader } from 'mysql2';
+import { 
+  validateEtiquetaData, 
+  validateModuleData, 
+  validateIdiomaData, 
+  validateTraduccionData,
+  sanitizeForExport,
+  generateTypeScriptIdentifier
+} from '../utils/validation';
 
 const router = Router();
 
@@ -82,6 +90,16 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { descripcion_etiqueta, id_modulo, porcentaje_traduccion } = req.body;
+    
+    // Validar datos de la etiqueta
+    const validation = validateEtiquetaData({ descripcion_etiqueta, id_modulo });
+    if (!validation.isValid) {
+      return res.status(400).json({
+        message: 'Datos de la etiqueta inválidos',
+        errors: validation.errors
+      });
+    }
+    
     const [result] = await pool.query<ResultSetHeader>(
       'INSERT INTO etiquetas (descripcion_etiqueta, id_modulo, porcentaje_traduccion) VALUES (?, ?, ?)',
       [descripcion_etiqueta, id_modulo, porcentaje_traduccion || 0.00]
@@ -106,6 +124,15 @@ router.put('/:id', async (req, res) => {
   try {
     console.log('Actualizando etiqueta:', req.params.id, req.body);
     const { descripcion_etiqueta, id_modulo, porcentaje_traduccion } = req.body;
+    
+    // Validar datos de la etiqueta
+    const validation = validateEtiquetaData({ descripcion_etiqueta, id_modulo });
+    if (!validation.isValid) {
+      return res.status(400).json({
+        message: 'Datos de la etiqueta inválidos',
+        errors: validation.errors
+      });
+    }
     
     await pool.query(
       'UPDATE etiquetas SET descripcion_etiqueta = ?, id_modulo = ?, porcentaje_traduccion = ? WHERE id_etiqueta = ?',
@@ -231,6 +258,14 @@ router.get('/export/translations/:modulo_id', async (req, res) => {
       'ORDER BY t.orden',
       [etiquetaIds]
     );
+    
+    // Verificar si hay traducciones
+    if (!Array.isArray(traducciones) || traducciones.length === 0) {
+      return res.status(400).json({
+        message: 'No se puede exportar el módulo',
+        errors: ['El módulo no tiene ninguna traducción realizada. Debes agregar traducciones antes de exportar.']
+      });
+    }
     
     // Generar el contenido del archivo .ts
     const nombreModulo = (modulo[0] as any).nombre_modulo.replace(/\s+/g, '');

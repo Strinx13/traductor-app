@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { pool } from '../config/database';
 import { ResultSetHeader } from 'mysql2';
+import { validateIdiomaData } from '../utils/validation';
 
 const router = Router();
 
@@ -32,6 +33,16 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { nombre_idioma, codigo_iso } = req.body;
+    
+    // Validar datos del idioma
+    const validation = validateIdiomaData({ nombre_idioma, codigo_iso });
+    if (!validation.isValid) {
+      return res.status(400).json({
+        message: 'Datos del idioma inválidos',
+        errors: validation.errors
+      });
+    }
+    
     const [result] = await pool.query<ResultSetHeader>(
       'INSERT INTO idiomas (nombre_idioma, codigo_iso) VALUES (?, ?)',
       [nombre_idioma, codigo_iso]
@@ -50,6 +61,16 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { nombre_idioma, codigo_iso } = req.body;
+    
+    // Validar datos del idioma
+    const validation = validateIdiomaData({ nombre_idioma, codigo_iso });
+    if (!validation.isValid) {
+      return res.status(400).json({
+        message: 'Datos del idioma inválidos',
+        errors: validation.errors
+      });
+    }
+    
     await pool.query(
       'UPDATE idiomas SET nombre_idioma = ?, codigo_iso = ? WHERE id_idioma = ?',
       [nombre_idioma, codigo_iso, req.params.id]
