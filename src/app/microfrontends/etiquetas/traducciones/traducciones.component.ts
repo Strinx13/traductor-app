@@ -100,9 +100,22 @@ export class TraduccionesComponent implements OnInit, OnDestroy {
       return;
     }
     
+    // Validación adicional del texto
+    const texto = this.traduccionEditando.texto_traduccion.trim();
+    if (texto.length === 0) {
+      this.alertService.showWarning('Validación', 'El texto de traducción no puede estar vacío');
+      return;
+    }
+    
+    // Verificar si el texto contiene solo espacios en blanco
+    if (texto.replace(/\s/g, '').length === 0) {
+      this.alertService.showWarning('Validación', 'El texto de traducción no puede contener solo espacios en blanco');
+      return;
+    }
+    
     this.subscription.add(
       this.traduccionesService.actualizarTraduccion(this.traduccionEditando.id_traduccion, {
-        texto_traduccion: this.traduccionEditando.texto_traduccion
+        texto_traduccion: texto
       }).subscribe({
         next: () => {
           this.cargarTraducciones();
@@ -112,7 +125,25 @@ export class TraduccionesComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error al actualizar traducción:', error);
-          this.alertService.showError('Error', 'No se pudo actualizar la traducción');
+          
+          // Mostrar detalles específicos del error
+          let errorMessage = 'No se pudo actualizar la traducción';
+          
+          if (error.status === 400) {
+            if (error.error && error.error.errors) {
+              errorMessage = `Error de validación: ${error.error.errors.join(', ')}`;
+            } else if (error.error && error.error.message) {
+              errorMessage = error.error.message;
+            } else {
+              errorMessage = 'Datos inválidos enviados al servidor';
+            }
+          } else if (error.status === 404) {
+            errorMessage = 'La traducción no fue encontrada';
+          } else if (error.status >= 500) {
+            errorMessage = 'Error interno del servidor';
+          }
+          
+          this.alertService.showError('Error', errorMessage);
           this.toastService.showError('Error al actualizar la traducción');
         }
       })

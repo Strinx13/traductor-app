@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { pool } from '../config/database';
 import { ResultSetHeader } from 'mysql2';
-import { validateTraduccionData } from '../utils/validation';
+import { validateTraduccionData, validateTraduccionUpdateData } from '../utils/validation';
 
 const router = Router();
 
@@ -112,16 +112,12 @@ router.put('/:id', async (req, res) => {
     const { texto_traduccion } = req.body;
     const id_traduccion = req.params.id;
 
-    // Validar datos de la traducción
-    const validation = validateTraduccionData({ 
-      id_etiqueta: 0, // No se valida en actualización
-      id_idioma: 0,   // No se valida en actualización
-      texto_traduccion 
-    });
+    // Validar datos de la traducción usando la función específica para actualizaciones
+    const validation = validateTraduccionUpdateData({ texto_traduccion });
     if (!validation.isValid) {
       return res.status(400).json({
         message: 'Datos de la traducción inválidos',
-        errors: validation.errors.filter(error => error.includes('texto_traduccion'))
+        errors: validation.errors
       });
     }
 

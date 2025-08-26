@@ -104,17 +104,18 @@ export class ModulosTableComponent implements OnInit, OnDestroy {
   }
 
   exportarModulo(modulo: Modulo) {
+    // Verificar si el módulo tiene etiquetas antes de intentar exportar
+    if (!modulo.idiomas_seleccionados || modulo.idiomas_seleccionados.length === 0) {
+      this.toastService.showWarning('No se puede exportar: El módulo no tiene idiomas seleccionados');
+      return;
+    }
     
-
-    const timeoutId = setTimeout(() => {
-      this.toastService.showWarning('No se puede exportar: El módulo no tiene traducciones');
-    }, 50); 
+    // Mostrar mensaje de carga
+    this.toastService.showInfo('Exportando módulo...');
     
-    // Verificar si el módulo tiene traducciones antes de intentar exportar
+    // Exportar el módulo
     fetch(`http://localhost:3000/api/etiquetas/export/translations/${modulo.id_modulo}`)
       .then(response => {
-        clearTimeout(timeoutId);
-        
         if (!response.ok) {
           return response.json().then(errorData => {
             throw new Error(errorData.message || 'Error al exportar');
@@ -123,8 +124,6 @@ export class ModulosTableComponent implements OnInit, OnDestroy {
         return response.blob();
       })
       .then(blob => {
-        clearTimeout(timeoutId);
-        
         // Crear URL del blob y descargar
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -135,21 +134,17 @@ export class ModulosTableComponent implements OnInit, OnDestroy {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
         
+        this.toastService.showSuccess('Módulo exportado correctamente');
       })
       .catch(error => {
-        clearTimeout(timeoutId);
-        
         console.error('Error al exportar:', error);
         
-        if (error.message && error.message.includes('No se puede exportar el módulo')) {
-          setTimeout(() => {
-            this.toastService.showWarning('No se puede exportar: El módulo no tiene traducciones');
-          }, 50);
-        } else {
-          setTimeout(() => {
-            this.toastService.showError('Error al exportar el módulo');
-          }, 50);
+        let errorMessage = 'Error al exportar el módulo';
+        if (error.message && error.message.includes('no tiene etiquetas')) {
+          errorMessage = 'No se puede exportar: El módulo no tiene etiquetas';
         }
+        
+        this.toastService.showError(errorMessage);
       });
   }
 

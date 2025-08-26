@@ -239,6 +239,14 @@ router.get('/export/translations/:modulo_id', async (req, res) => {
       [modulo_id]
     );
     
+    // Verificar si hay etiquetas
+    if (!Array.isArray(etiquetas) || etiquetas.length === 0) {
+      return res.status(400).json({
+        message: 'No se puede exportar el módulo',
+        errors: ['El módulo no tiene etiquetas. Debes agregar etiquetas antes de exportar.']
+      });
+    }
+    
     // Obtener solo los idiomas seleccionados para este módulo
     const [idiomas] = await pool.query(`
       SELECT i.* FROM idiomas i
@@ -258,14 +266,6 @@ router.get('/export/translations/:modulo_id', async (req, res) => {
       'ORDER BY t.orden',
       [etiquetaIds]
     );
-    
-    // Verificar si hay traducciones
-    if (!Array.isArray(traducciones) || traducciones.length === 0) {
-      return res.status(400).json({
-        message: 'No se puede exportar el módulo',
-        errors: ['El módulo no tiene ninguna traducción realizada. Debes agregar traducciones antes de exportar.']
-      });
-    }
     
     // Generar el contenido del archivo .ts
     const nombreModulo = (modulo[0] as any).nombre_modulo.replace(/\s+/g, '');
@@ -308,17 +308,29 @@ function generarArchivoTS(nombreModulo: string, etiquetas: any[], idiomas: any[]
     
     contenido += `    this.traduccion('${clave}', [\n`;
     
-    // Buscar traducciones para esta etiqueta y ordenarlas por el campo 'orden'
-    const traduccionesEtiqueta = traducciones
-      .filter(t => t.id_etiqueta === etiqueta.id_etiqueta)
-      .sort((a, b) => (a.orden || 0) - (b.orden || 0));
-    
-    // Generar traducciones en el orden establecido por el usuario
-    traduccionesEtiqueta.forEach(traduccion => {
-      const enumIdioma = isoToEnum[traduccion.codigo_iso] || 'Esp';
-      const descripcion = traduccion.texto_traduccion || etiqueta.descripcion_etiqueta;
+    // Generar campos para todos los idiomas seleccionados del módulo
+    idiomas.forEach(idioma => {
+      const enumIdioma = isoToEnum[idioma.codigo_iso] || 'Esp';
       
-      contenido += `      { idioma: IdiomaEnum.${enumIdioma}, descripcion: '${descripcion.replace(/'/g, "\\'")}' },\n`;
+      // Buscar si existe una traducción para esta etiqueta e idioma
+      const traduccionExistente = traducciones.find(t => 
+        t.id_etiqueta === etiqueta.id_etiqueta && 
+        t.id_idioma === idioma.id_idioma
+      );
+      
+      let descripcion = '';
+      if (traduccionExistente) {
+        // Si existe traducción, usar el texto traducido
+        descripcion = traduccionExistente.texto_traduccion || '';
+      } else {
+        // Si no existe traducción, dejar el campo vacío
+        descripcion = '';
+      }
+      
+      // Escapar comillas simples para TypeScript
+      const descripcionEscapada = descripcion.replace(/'/g, "\\'");
+      
+      contenido += `      { idioma: IdiomaEnum.${enumIdioma}, descripcion: '${descripcionEscapada}' },\n`;
     });
     
     contenido += `    ]);\n`;

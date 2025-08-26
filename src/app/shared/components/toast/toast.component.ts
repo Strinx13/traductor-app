@@ -2,13 +2,32 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToastService, ToastData } from '../../services/toast.service';
 import { Subscription } from 'rxjs';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-toast',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './toast.component.html',
-  styleUrls: ['./toast.component.css']
+  styleUrls: ['./toast.component.css'],
+  animations: [
+    trigger('slideInOut', [
+      state('void', style({
+        transform: 'translateX(100%)',
+        opacity: 0
+      })),
+      state('*', style({
+        transform: 'translateX(0)',
+        opacity: 1
+      })),
+      transition('void => *', [
+        animate('300ms ease-out')
+      ]),
+      transition('* => void', [
+        animate('300ms ease-in')
+      ])
+    ])
+  ]
 })
 export class ToastComponent implements OnInit, OnDestroy {
   toasts: ToastData[] = [];

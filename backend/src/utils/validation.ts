@@ -203,3 +203,29 @@ export function validateTraduccionData(data: any): { isValid: boolean; errors: s
     errors
   };
 }
+
+// Función para validar solo el texto de traducción (para actualizaciones)
+export function validateTraduccionUpdateData(data: any): { isValid: boolean; errors: string[] } {
+  const errors: string[] = [];
+  
+  if (!data.texto_traduccion) {
+    errors.push('El texto de traducción es requerido');
+  } else if (typeof data.texto_traduccion !== 'string') {
+    errors.push('El texto de traducción debe ser una cadena de texto');
+  } else {
+    const texto = data.texto_traduccion.trim();
+    if (texto.length === 0) {
+      errors.push('El texto de traducción no puede estar vacío');
+    } else {
+      const validation = validateRegex(texto, VALIDATION_REGEX.TRANSLATION_TEXT, VALIDATION_MESSAGES.TRANSLATION_TEXT);
+      if (!validation.isValid) {
+        errors.push(validation.error!);
+      }
+    }
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+}
