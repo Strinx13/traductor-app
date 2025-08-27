@@ -29,7 +29,7 @@ export class IdiomasTableComponent implements OnInit {
   }
 
   cargarIdiomas() {
-    this.http.get<any[]>('http://localhost:3000/api/idiomas').subscribe({
+    this.http.get<any[]>('http://localhost:3001/api/idiomas').subscribe({
       next: (data) => {
         this.idiomas = data;
       },
@@ -56,7 +56,7 @@ export class IdiomasTableComponent implements OnInit {
 
   guardarIdioma(idioma: any) {
     if (this.modoEdicion) {
-      this.http.put(`http://localhost:3000/api/idiomas/${idioma.id_idioma}`, idioma).subscribe({
+      this.http.put(`http://localhost:3001/api/idiomas/${idioma.id_idioma}`, idioma).subscribe({
         next: () => {
           this.cargarIdiomas();
           this.idiomaSeleccionado = null;
@@ -70,7 +70,7 @@ export class IdiomasTableComponent implements OnInit {
         }
       });
     } else {
-      this.http.post('http://localhost:3000/api/idiomas', idioma).subscribe({
+      this.http.post('http://localhost:3001/api/idiomas', idioma).subscribe({
         next: () => {
           this.cargarIdiomas();
           this.idiomaSeleccionado = null;
@@ -93,7 +93,7 @@ export class IdiomasTableComponent implements OnInit {
   async eliminarIdioma(idioma: any) {
     const confirmed = await this.notificationService.showConfirmDelete('el idioma');
     if (confirmed) {
-      this.http.delete(`http://localhost:3000/api/idiomas/${idioma.id_idioma}`).subscribe({
+      this.http.delete(`http://localhost:3001/api/idiomas/${idioma.id_idioma}`).subscribe({
         next: () => {
           this.cargarIdiomas();
           this.notificationService.showManualSuccess('Éxito', 'Idioma eliminado correctamente');

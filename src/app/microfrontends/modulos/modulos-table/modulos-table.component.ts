@@ -6,6 +6,7 @@ import { ModulosService, Modulo, ModuloCreateRequest, ModuloUpdateRequest } from
 import { NotificationService } from '../../../shared/services/notification.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { ValidationService } from '../../../shared/services/validation.service';
+import { ExportService } from '../../../shared/services/export.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -25,7 +26,8 @@ export class ModulosTableComponent implements OnInit, OnDestroy {
     private modulosService: ModulosService,
     private notificationService: NotificationService,
     private toastService: ToastService,
-    private validationService: ValidationService
+    private validationService: ValidationService,
+    private exportService: ExportService
   ) {}
 
   ngOnInit() {
@@ -103,10 +105,21 @@ export class ModulosTableComponent implements OnInit, OnDestroy {
     this.moduloSeleccionado = null;
   }
 
-  exportarModulo(modulo: Modulo) {
-    // Verificar si el módulo tiene etiquetas antes de intentar exportar
+  // Función para verificar si un módulo puede ser exportado
+  puedeExportarModulo(modulo: Modulo): boolean {
+    // Verificar si el módulo tiene idiomas seleccionados
     if (!modulo.idiomas_seleccionados || modulo.idiomas_seleccionados.length === 0) {
-      this.toastService.showWarning('No se puede exportar: El módulo no tiene idiomas seleccionados');
+      return false;
+    }
+    
+    // Verificar si el módulo tiene traducciones realizadas (porcentaje de avance > 0)
+    return modulo.porcentaje_avance > 0;
+  }
+
+  exportarModulo(modulo: Modulo) {
+    // Verificar si el módulo puede ser exportado
+    if (!this.puedeExportarModulo(modulo)) {
+      this.toastService.showWarning('No se puede exportar: El módulo no tiene traducciones realizadas');
       return;
     }
     
@@ -114,7 +127,7 @@ export class ModulosTableComponent implements OnInit, OnDestroy {
     this.toastService.showInfo('Exportando módulo...');
     
     // Exportar el módulo
-    fetch(`http://localhost:3000/api/etiquetas/export/translations/${modulo.id_modulo}`)
+    fetch(`http://localhost:3001/api/etiquetas/export/translations/${modulo.id_modulo}`)
       .then(response => {
         if (!response.ok) {
           return response.json().then(errorData => {
@@ -128,7 +141,11 @@ export class ModulosTableComponent implements OnInit, OnDestroy {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${modulo.nombre_modulo.replace(/\s+/g, '')}Translation.ts`;
+        
+        // Usar el servicio de exportación para generar un nombre de archivo seguro
+        const filename = this.exportService.generateSafeFilename(modulo.nombre_modulo);
+        link.download = filename;
+        
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

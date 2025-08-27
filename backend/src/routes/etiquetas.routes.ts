@@ -7,7 +7,8 @@ import {
   validateIdiomaData, 
   validateTraduccionData,
   sanitizeForExport,
-  generateTypeScriptIdentifier
+  generateTypeScriptIdentifier,
+  generateValidTypeScriptIdentifier
 } from '../utils/validation';
 
 const router = Router();
@@ -108,14 +109,14 @@ router.post('/', async (req, res) => {
     // Actualizar el porcentaje de avance del módulo
     await actualizarPorcentajeAvanceModulo(id_modulo);
     
-    res.status(201).json({ 
+    return res.status(201).json({ 
       id_etiqueta: result.insertId, 
       descripcion_etiqueta, 
       id_modulo,
       porcentaje_traduccion: porcentaje_traduccion || 0.00
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error al crear la etiqueta', error });
+    return res.status(500).json({ message: 'Error al crear la etiqueta', error });
   }
 });
 
@@ -143,7 +144,7 @@ router.put('/:id', async (req, res) => {
     // Actualizar el porcentaje de avance del módulo
     await actualizarPorcentajeAvanceModulo(id_modulo);
     
-    res.json({ 
+    return res.json({ 
       id_etiqueta: req.params.id, 
       descripcion_etiqueta, 
       id_modulo,
@@ -151,7 +152,7 @@ router.put('/:id', async (req, res) => {
     });
   } catch (error) {
     console.error('Error al actualizar la etiqueta:', error);
-    res.status(500).json({ message: 'Error al actualizar la etiqueta', error });
+    return res.status(500).json({ message: 'Error al actualizar la etiqueta', error });
   }
 });
 
@@ -274,11 +275,11 @@ router.get('/export/translations/:modulo_id', async (req, res) => {
     // Configurar headers para descarga
     res.setHeader('Content-Type', 'text/plain');
     res.setHeader('Content-Disposition', `attachment; filename="${nombreModulo}Translation.ts"`);
-    res.send(contenido);
+    return res.send(contenido);
     
   } catch (error) {
     console.error('Error al exportar traducciones:', error);
-    res.status(500).json({ message: 'Error al exportar traducciones', error });
+    return res.status(500).json({ message: 'Error al exportar traducciones', error });
   }
 });
 
@@ -304,7 +305,8 @@ function generarArchivoTS(nombreModulo: string, etiquetas: any[], idiomas: any[]
   
   // Para cada etiqueta, generar las traducciones
   etiquetas.forEach(etiqueta => {
-    const clave = etiqueta.descripcion_etiqueta.toUpperCase().replace(/\s+/g, '_').replace(/[^A-Z0-9_]/g, '');
+    // Usar la nueva función que preserva acentos pero genera identificadores válidos
+    const clave = generateValidTypeScriptIdentifier(etiqueta.descripcion_etiqueta);
     
     contenido += `    this.traduccion('${clave}', [\n`;
     

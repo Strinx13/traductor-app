@@ -16,6 +16,10 @@ export interface Modulo {
   idiomas_seleccionados?: Idioma[];
 }
 
+export interface ModuloConEtiquetas extends Modulo {
+  etiquetas?: any[];
+}
+
 export interface ModuloCreateRequest {
   nombre_modulo: string;
   idiomas_seleccionados: number[];
@@ -30,7 +34,7 @@ export interface ModuloUpdateRequest {
   providedIn: 'root'
 })
 export class ModulosService {
-  private apiUrl = 'http://localhost:3000/api/modulos';
+  private apiUrl = 'http://localhost:3001/api/modulos';
   private modulosSubject = new BehaviorSubject<Modulo[]>([]);
   public modulos$ = this.modulosSubject.asObservable();
 
@@ -85,5 +89,15 @@ export class ModulosService {
 
   refrescarModulos(): void {
     this.cargarModulos();
+  }
+
+  // Obtener las etiquetas de un módulo específico
+  getEtiquetasModulo(idModulo: number): Observable<any[]> {
+    return this.http.get<any[]>(`http://localhost:3001/api/etiquetas?modulo=${idModulo}`);
+  }
+
+  // Obtener las etiquetas con sus traducciones para un módulo
+  getEtiquetasConTraducciones(idModulo: number): Observable<any[]> {
+    return this.http.get<any[]>(`http://localhost:3001/api/etiquetas/modulo/${idModulo}/traducciones`);
   }
 } 

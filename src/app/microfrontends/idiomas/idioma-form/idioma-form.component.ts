@@ -18,6 +18,13 @@ export class IdiomaFormComponent {
 
   constructor(private alertService: AlertService) {}
 
+  // Función para convertir el código ISO a mayúsculas
+  onCodigoIsoChange() {
+    if (this.idioma.codigo_iso) {
+      this.idioma.codigo_iso = this.idioma.codigo_iso.toUpperCase();
+    }
+  }
+
   onGuardar() {
     // Validar que se haya ingresado un nombre
     if (!this.idioma.nombre_idioma || !this.idioma.nombre_idioma.trim()) {
@@ -31,9 +38,9 @@ export class IdiomaFormComponent {
       return;
     }
 
-    // Validar que el código ISO tenga máximo 3 caracteres
-    if (this.idioma.codigo_iso.trim().length > 3) {
-      this.alertService.showWarning('Validación', 'El código ISO debe tener máximo 3 caracteres');
+    // Validar que el código ISO tenga máximo 2 caracteres
+    if (this.idioma.codigo_iso.trim().length > 2) {
+      this.alertService.showWarning('Validación', 'El código ISO debe tener máximo 2 caracteres');
       return;
     }
 

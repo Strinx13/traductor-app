@@ -94,7 +94,7 @@ router.post('/', async (req, res) => {
     // Actualizar el porcentaje de traducción de la etiqueta
     await actualizarPorcentajeTraduccion(id_etiqueta);
 
-    res.status(201).json({ 
+    return res.status(201).json({ 
       id_traduccion: result.insertId, 
       id_etiqueta, 
       id_idioma, 
@@ -102,7 +102,7 @@ router.post('/', async (req, res) => {
       orden: nextOrder
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error al crear la traducción', error });
+    return res.status(500).json({ message: 'Error al crear la traducción', error });
   }
 });
 
@@ -136,12 +136,12 @@ router.put('/:id', async (req, res) => {
       await actualizarPorcentajeTraduccion((traduccion[0] as any).id_etiqueta);
     }
 
-    res.json({ 
+    return res.json({ 
       id_traduccion, 
       texto_traduccion 
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error al actualizar la traducción', error });
+    return res.status(500).json({ message: 'Error al actualizar la traducción', error });
   }
 });
 

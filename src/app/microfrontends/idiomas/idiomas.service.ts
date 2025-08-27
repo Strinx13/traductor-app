@@ -12,7 +12,7 @@ export interface Idioma {
   providedIn: 'root'
 })
 export class IdiomasService {
-  private apiUrl = 'http://localhost:3000/api/idiomas';
+  private apiUrl = 'http://localhost:3001/api/idiomas';
 
   constructor(private http: HttpClient) { }
 

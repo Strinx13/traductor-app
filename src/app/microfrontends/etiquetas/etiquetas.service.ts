@@ -14,7 +14,7 @@ export interface Etiqueta {
   providedIn: 'root'
 })
 export class EtiquetasService {
-  private apiUrl = 'http://localhost:3000/api/etiquetas';
+  private apiUrl = 'http://localhost:3001/api/etiquetas';
   private etiquetasSubject = new BehaviorSubject<Etiqueta[]>([]);
   public etiquetas$ = this.etiquetasSubject.asObservable();
 

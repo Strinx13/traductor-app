@@ -32,7 +32,7 @@ export interface TraduccionOrdenRequest {
   providedIn: 'root'
 })
 export class TraduccionesService {
-  private apiUrl = 'http://localhost:3000/api/traducciones';
+  private apiUrl = 'http://localhost:3001/api/traducciones';
   private traduccionesSubject = new BehaviorSubject<Traduccion[]>([]);
   public traducciones$ = this.traduccionesSubject.asObservable();
 

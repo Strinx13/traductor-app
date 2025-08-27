@@ -107,6 +107,62 @@ export function generateTypeScriptIdentifier(text: string): string {
   return identifier;
 }
 
+// Nueva función para generar identificadores de TypeScript que preserve acentos
+export function generateTypeScriptIdentifierWithAccents(text: string): string {
+  if (!text) return 'TRANSLATION';
+  
+  // Mapeo de caracteres acentuados a sus equivalentes sin acento para TypeScript
+  const accentMap: { [key: string]: string } = {
+    'á': 'A', 'é': 'E', 'í': 'I', 'ó': 'O', 'ú': 'U', 'ñ': 'N',
+    'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ú': 'U', 'Ñ': 'N',
+    'à': 'A', 'è': 'E', 'ì': 'I', 'ò': 'O', 'ù': 'U',
+    'À': 'A', 'È': 'E', 'Ì': 'I', 'Ò': 'O', 'Ù': 'U',
+    'ä': 'A', 'ë': 'E', 'ï': 'I', 'ö': 'O', 'ü': 'U',
+    'Ä': 'A', 'Ë': 'E', 'Ï': 'I', 'Ö': 'O', 'Ü': 'U',
+    'â': 'A', 'ê': 'E', 'î': 'I', 'ô': 'O', 'û': 'U',
+    'Â': 'A', 'Ê': 'E', 'Î': 'I', 'Ô': 'O', 'Û': 'U',
+    'ã': 'A', 'õ': 'O', 'Ã': 'A', 'Õ': 'O'
+  };
+  
+  let identifier = text
+    .toUpperCase()
+    .split('')
+    .map(char => accentMap[char] || char)
+    .join('')
+    .replace(/[^A-Z0-9\s]/g, '') // Remover caracteres especiales restantes
+    .replace(/\s+/g, '_')         // Reemplazar espacios con guiones bajos
+    .replace(/_+/g, '_')          // Consolidar múltiples guiones bajos
+    .replace(/^_|_$/g, '');       // Remover guiones bajos al inicio y final
+  
+  // Si el resultado está vacío o no empieza con letra, agregar prefijo
+  if (!identifier || !/^[A-Z]/.test(identifier)) {
+    identifier = 'TRANSLATION_' + identifier;
+  }
+  
+  // Limitar longitud para evitar identificadores demasiado largos
+  if (identifier.length > 50) {
+    identifier = identifier.substring(0, 50);
+  }
+  
+  return identifier;
+}
+
+// Función para generar identificadores de TypeScript que preserve acentos pero sea válido
+export function generateValidTypeScriptIdentifier(text: string): string {
+  if (!text) return 'TRANSLATION';
+  
+  // Primero intentar con la función que preserva acentos
+  let identifier = generateTypeScriptIdentifierWithAccents(text);
+  
+  // Verificar si el identificador es válido para TypeScript
+  if (/^[A-Z][A-Z0-9_]*$/.test(identifier)) {
+    return identifier;
+  }
+  
+  // Si no es válido, usar la función original
+  return generateTypeScriptIdentifier(text);
+}
+
 // Función para validar datos completos de un módulo
 export function validateModuleData(data: any): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];

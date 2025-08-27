@@ -47,13 +47,13 @@ router.post('/', async (req, res) => {
       'INSERT INTO idiomas (nombre_idioma, codigo_iso) VALUES (?, ?)',
       [nombre_idioma, codigo_iso]
     );
-    res.status(201).json({ 
+    return res.status(201).json({ 
       id_idioma: result.insertId, 
       nombre_idioma, 
       codigo_iso 
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error al crear el idioma', error });
+    return res.status(500).json({ message: 'Error al crear el idioma', error });
   }
 });
 
@@ -75,13 +75,13 @@ router.put('/:id', async (req, res) => {
       'UPDATE idiomas SET nombre_idioma = ?, codigo_iso = ? WHERE id_idioma = ?',
       [nombre_idioma, codigo_iso, req.params.id]
     );
-    res.json({ 
+    return res.json({ 
       id_idioma: req.params.id, 
       nombre_idioma, 
       codigo_iso 
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error al actualizar el idioma', error });
+    return res.status(500).json({ message: 'Error al actualizar el idioma', error });
   }
 });
 
